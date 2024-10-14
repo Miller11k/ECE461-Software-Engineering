@@ -24,8 +24,8 @@ dotenv.config();
 /**
  * Retrieves the GitHub repository URL from an npm package URL.
  *
- * @param npmUrl - The URL of the npm package.
- * @returns A promise that resolves to the GitHub repository URL if found, or null if not found.
+ * @param {string} npmUrl - The URL of the npm package.
+ * @returns {Promise<string | null>} A promise that resolves to the GitHub repository URL if found, or null if not found.
  *
  * @remarks
  * This function extracts the package name from the provided npm URL and fetches the package details from the npm registry.
@@ -145,8 +145,8 @@ async function runTests() {
 /**
  * Processes a file containing URLs and performs actions based on the type of URL.
  * 
- * @param filePath - The path to the file containing the URLs.
- * @returns A promise that resolves when all URLs have been processed.
+ * @param {string} filePath - The path to the file containing the URLs.
+ * @returns {Promise<void>} A promise that resolves when all URLs have been processed.
  */
 async function processUrls(filePath: string): Promise<void> {
     logger.info(`Processing URLs from file: ${filePath}`);

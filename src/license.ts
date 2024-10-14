@@ -25,8 +25,8 @@ export class License extends Metrics {
      * 
      * Initializes the class with the native URL and the repository URL.
      * 
-     * @param nativeUrl The native URL to connect to.
-     * @param url The repository URL.
+     * @param {string} nativeUrl - The native URL to connect to.
+     * @param {string} url - The repository URL.
      */
     constructor(nativeUrl: string, url: string) {
         super(nativeUrl, url);
@@ -37,8 +37,8 @@ export class License extends Metrics {
      * 
      * Uses the `git` library to clone the repository into the specified directory.
      * 
-     * @param cloneDir The directory where the repository will be cloned.
-     * @return A promise that resolves when the cloning process is complete.
+     * @param {string} cloneDir - The directory where the repository will be cloned.
+     * @returns {Promise<void>} A promise that resolves when the cloning process is complete.
      */
     private async cloneRepository(cloneDir: string): Promise<void> {
         logger.debug(`Cloning repository to ${cloneDir}`);
@@ -57,8 +57,8 @@ export class License extends Metrics {
      * 
      * Compares the license text against a list of predefined compatible licenses.
      * 
-     * @param licenseText The license text to check compatibility for.
-     * @return A number indicating the compatibility of the license. Returns 1 if the license is compatible, 0 otherwise.
+     * @param {string} licenseText - The license text to check compatibility for.
+     * @returns {number} A number indicating the compatibility of the license. Returns 1 if the license is compatible, 0 otherwise.
      */
     private checkLicenseCompatibility(licenseText: string): number {
         const compatibleLicenses = [
@@ -86,8 +86,8 @@ export class License extends Metrics {
      * 
      * Looks for license-related files (e.g., LICENSE, README) and attempts to extract license information from them.
      * 
-     * @param cloneDir The directory to search for license information.
-     * @return A promise that resolves to the extracted license information, or null if no license information is found.
+     * @param {string} cloneDir - The directory to search for license information.
+     * @returns {Promise<string | null>} A promise that resolves to the extracted license information, or null if no license information is found.
      */
     private async extractLicenseInfo(cloneDir: string): Promise<string | null> {
         let licenseInfo: string | null = null;
@@ -129,7 +129,7 @@ export class License extends Metrics {
      * 
      * Clones the repository, extracts the license information, and checks its compatibility against a predefined list of compatible licenses.
      * 
-     * @return A promise that resolves to the license compatibility result (1 for compatible, 0 for incompatible).
+     * @returns {Promise<number>} A promise that resolves to the license compatibility result (1 for compatible, 0 for incompatible).
      */
     public async evaluate(): Promise<number> {
         logger.debug(`Evaluating License for ${this.url}`);
@@ -164,7 +164,8 @@ export class License extends Metrics {
 
 /**
  * This function performs license tests on a list of URLs and returns the number of tests passed and failed.
- * @returns A promise that resolves to an object containing the number of tests passed and failed.
+ * 
+ * @returns {Promise<{ passed: number, failed: number }>} A promise that resolves to an object containing the number of tests passed and failed.
  */
 export async function LicenseTest(): Promise<{ passed: number, failed: number }> {
     logger.info('\nRunning License Tests...');

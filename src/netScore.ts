@@ -32,8 +32,8 @@ export class NetScore extends Metrics {
     netScore: number = 0;
 
     /**
-     * @brief An instance of the BusFactor metric.
-     */
+    * @brief An instance of the BusFactor metric.
+    */
     busFactor: BusFactor;
 
     /**
@@ -61,8 +61,8 @@ export class NetScore extends Metrics {
      * 
      * Initializes each metric with the provided native URL and project URL.
      * 
-     * @param nativeUrl The native URL of the project.
-     * @param url The URL of the project.
+     * @param {string} nativeUrl - The native URL of the project.
+     * @param {string} url - The URL of the project.
      */
     constructor(nativeUrl: string, url: string) {
         super(nativeUrl, url);
@@ -80,7 +80,7 @@ export class NetScore extends Metrics {
      * the net score is set to 0. The score is clamped between 0 and 1. 
      * Also calculates and logs the response time for evaluation.
      * 
-     * @returns A promise that resolves to the calculated net score.
+     * @returns {Promise<number>} A promise that resolves to the calculated net score.
      */
     async evaluate(): Promise<number> {
         // Generate the metrics
@@ -133,7 +133,7 @@ export class NetScore extends Metrics {
      * The returned string includes detailed information about the net score, the latencies of various metrics, and other related data. 
      * The format is a JSON-like string with fields for each metric and its corresponding latency.
      * 
-     * @returns A string representation of the NetScore object.
+     * @returns {string} A string representation of the NetScore object.
      */
     toString(): string {
         return `{
@@ -166,7 +166,7 @@ export class NetScore extends Metrics {
  * The net scores and response times are stored in an array.
  * The function returns an object containing the number of tests passed and failed.
  *
- * @returns A promise that resolves to an object with the number of tests passed and failed.
+ * @returns {Promise<{ passed: number, failed: number }>} A promise that resolves to an object with the number of tests passed and failed.
  */
 export async function NetScoreTest(): Promise<{ passed: number, failed: number }> {
     logger.info('\nRunning Net Score tests...');

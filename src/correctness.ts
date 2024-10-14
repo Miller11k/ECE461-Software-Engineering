@@ -22,8 +22,8 @@ export class Correctness extends Metrics {
      * 
      * Initializes the class with the native URL and the repository URL.
      * 
-     * @param nativeUrl The native URL to connect to.
-     * @param url The repository URL.
+     * @param {string} nativeUrl - The native URL to connect to.
+     * @param {string} url - The repository URL.
      */
     constructor(nativeUrl: string, url: string) {
         super(nativeUrl, url);
@@ -35,7 +35,7 @@ export class Correctness extends Metrics {
      * Fetches issues data and calculates correctness based on the ratio of open bug issues
      * to total open issues.
      * 
-     * @return A promise that resolves to the correctness value.
+     * @returns {Promise<number>} A promise that resolves to the correctness value.
      */
     public async evaluate(): Promise<number> {
         const rateLimitStatus = await this.getRateLimitStatus();
@@ -64,9 +64,9 @@ export class Correctness extends Metrics {
      * If no issues are reported, the correctness is considered perfect (1).
      * Otherwise, correctness is calculated as a value between 0 and 1, representing the percentage of correctness.
      * 
-     * @return A promise that resolves to a number representing the correctness of the system.
-     *         Returns 1 if there are no issues reported, a value between 0 and 1 representing the correctness percentage, 
-     *         or -1 if there was an error calculating correctness.
+     * @returns {Promise<number>} A promise that resolves to a number representing the correctness of the system.
+     *          Returns 1 if there are no issues reported, a value between 0 and 1 representing the correctness percentage, 
+     *          or -1 if there was an error calculating correctness.
      */
     private async calculateCorrectness(): Promise<number> {
         try {
@@ -92,7 +92,7 @@ export class Correctness extends Metrics {
      * 
      * Retrieves the number of open bug issues and the total number of open issues.
      * 
-     * @return A promise that resolves to an object containing the number of open bug issues 
+     * @returns {Promise<{ openBugIssues: number; totalOpenIssues: number }>} A promise that resolves to an object containing the number of open bug issues 
      * and the total number of open issues.
      * @throws {Error} If the repository URL is invalid or if there is an error fetching the data.
      */
@@ -125,7 +125,7 @@ export class Correctness extends Metrics {
 /**
  * Performs correctness tests on the given URLs and returns the number of tests passed and failed.
  *
- * @returns A promise that resolves to an object containing the number of tests passed and failed.
+ * @returns {Promise<{ passed: number, failed: number }>} A promise that resolves to an object containing the number of tests passed and failed.
  */
 export async function CorrectnessTest(): Promise<{ passed: number, failed: number }> {
     logger.info('\nRunning Correctness tests...');

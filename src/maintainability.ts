@@ -21,8 +21,8 @@ export class Maintainability extends Metrics {
      * 
      * Initializes the class with the native URL and the repository URL.
      * 
-     * @param nativeUrl The native URL to connect to.
-     * @param url The repository URL.
+     * @param {string} nativeUrl - The native URL to connect to.
+     * @param {string} url - The repository URL.
      */
     constructor(nativeUrl: string, url: string) {
         super(nativeUrl, url);
@@ -34,10 +34,10 @@ export class Maintainability extends Metrics {
      * Fetches the most recent issues from the repository and calculates the average issue resolution time. 
      * The score ranges between 0 and 1, where a higher score indicates better maintainability.
      * 
-     * @param owner The owner of the repository.
-     * @param repo The name of the repository.
-     * @return A promise that resolves to the maintainability score, a number between 0 and 1.
-     *         Returns -1 if there was an error fetching the issues.
+     * @param {string} owner - The owner of the repository.
+     * @param {string} repo - The name of the repository.
+     * @returns {Promise<number>} A promise that resolves to the maintainability score, a number between 0 and 1.
+     *          Returns -1 if there was an error fetching the issues.
      */
     private async calculateMaintainability(owner: string, repo: string): Promise<number> {
         try {
@@ -85,7 +85,7 @@ export class Maintainability extends Metrics {
      * 
      * If the GitHub API rate limit is exceeded, the evaluation will not proceed.
      * 
-     * @return A promise that resolves to the maintainability score.
+     * @returns {Promise<number>} A promise that resolves to the maintainability score.
      */
     public async evaluate(): Promise<number> {
         const rateLimitStatus = await this.getRateLimitStatus();

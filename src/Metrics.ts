@@ -4,13 +4,27 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
-// Access the token value
+/**
+ * The GitHub token used for authenticating API requests.
+ * 
+ * This value is retrieved from the environment variables and is essential for making authenticated calls to the GitHub API.
+ * 
+ * @constant {string} githubToken
+ * @throws {Error} Throws an error if GITHUB_TOKEN is not defined in the .env file.
+ */
 export const githubToken = process.env.GITHUB_TOKEN;
 if (!githubToken) {
     throw new Error('GITHUB_TOKEN is not defined in the .env file');
 }
 
-// Determine log level from environment variable
+/**
+ * The log level used for logging messages.
+ * 
+ * The value is determined from the environment variable LOG_LEVEL, with possible values mapped to specific logging levels.
+ * 
+ * @constant {string} logLevel
+ * @throws {Error} Throws an error if LOG_LEVEL is not defined in the .env file.
+ */
 export let logLevel = process.env.LOG_LEVEL?.toLowerCase();
 if (!logLevel) {
     // logLevel = 'info';
@@ -30,16 +44,36 @@ else{
        }
 }
             
-            
+
+/**
+ * The log file path where logs will be written.
+ * 
+ * This value is retrieved from the environment variables and must be defined for logging functionality.
+ * 
+ * @constant {string} logFile
+ * @throws {Error} Throws an error if LOG_FILE is not defined in the .env file.
+ */
 export let logFile = process.env.LOG_FILE;
 if (!logFile) {
     throw new Error('LOG_FILE is not defined in the .env file');
 }
 
-// Create an Octokit instance
+/**
+ * The Octokit instance used for interacting with the GitHub API.
+ * 
+ * This instance is initialized with the GitHub token for authentication.
+ * 
+ * @constant {Octokit} OCTOKIT
+ */
 export let OCTOKIT: Octokit = new Octokit({ auth: githubToken });
 
-// Create a logger
+/**
+ * The logger instance used for logging messages.
+ * 
+ * This instance is created using the Winston library and configured with the specified log level and format.
+ * 
+ * @constant {Logger} logger
+ */
 export let logger: Logger = createLogger({
     level: logLevel,
     format: format.combine(
@@ -66,20 +100,6 @@ export let logger: Logger = createLogger({
  * @constructor
  * @param {string} NativeURL - The native URL of the repository.
  * @param {string} url - The URL of the repository.
- * 
- * @method getRepoData
- * @private
- * @param {string} url - The GitHub repository URL.
- * @returns {Object} An object containing the owner and repository name.
- * @throws {Error} Will throw an error if the URL is invalid.
- * 
- * @method evaluate
- * @abstract
- * @returns {Promise<number>} A promise that resolves to a number representing the evaluation result.
- * 
- * @method getRateLimitStatus
- * @public
- * @returns {Promise<Object>} A promise that resolves to an object containing the rate limit data.
  */
 export abstract class Metrics {
     public responseTime: number = 0;
@@ -110,9 +130,9 @@ export abstract class Metrics {
     /**
      * Extracts the owner and repository name from a given GitHub URL.
      *
-     * @param url - The GitHub repository URL.
-     * @returns An object containing the owner and repository name.
-     * @throws Will throw an error if the URL is invalid.
+     * @param {string} url - The GitHub repository URL.
+     * @returns {{ owner: string; repo: string }} An object containing the owner and repository name.
+     * @throws {Error} Will throw an error if the URL is invalid.
      */
     private getRepoData(url: string): { owner: string; repo: string } {
         const regex = /github\.com\/([^/]+)\/([^/]+)/;

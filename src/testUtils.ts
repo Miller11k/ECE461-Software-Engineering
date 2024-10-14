@@ -1,12 +1,16 @@
 import { logger } from "./Metrics.js";
 
 /**
- * Asserts that the actual value is equal to the expected value within a threshold.
- * 
- * @param actual - The actual value to compare.
- * @param expected - The expected value to compare against.
- * @param testName - The name of the test (optional).
- * @returns Returns 1 if the assertion passes, otherwise returns 0.
+ * Asserts that the actual value is equal to the expected value within a default threshold of 0.01.
+ *
+ * This function checks whether the difference between the actual and expected values is 
+ * less than the threshold. If the assertion passes, a debug message is logged; otherwise, 
+ * an error message is logged.
+ *
+ * @param {number} actual - The actual value obtained from the test.
+ * @param {number} expected - The expected value to compare against.
+ * @param {string} [testName=''] - The name of the test (optional), used for logging purposes.
+ * @returns {number} Returns 1 if the assertion passes, otherwise returns 0.
  */
 export function ASSERT_EQ(actual: number, expected: number, testName: string = ''): number {
     let threshold = 0.01;
@@ -23,12 +27,16 @@ export function ASSERT_EQ(actual: number, expected: number, testName: string = '
 
 /**
  * Asserts that the actual value is near the expected value within a specified threshold.
- * 
- * @param actual - The actual value to compare.
- * @param expected - The expected value.
- * @param threshold - The threshold within which the actual value is considered near the expected value.e * @param testName - The name of the test (optional).
- * @param testName - The name of the test
- * @returns 1 if the assertion passes, 0 otherwise.
+ *
+ * This function determines if the absolute difference between the actual and expected 
+ * values is less than the provided threshold. Successful assertions log a debug message, 
+ * while failures log an error message.
+ *
+ * @param {number} actual - The actual value obtained from the test.
+ * @param {number} expected - The expected value to compare against.
+ * @param {number} threshold - The maximum acceptable difference for the assertion to pass.
+ * @param {string} [testName=''] - The name of the test (optional), used for logging purposes.
+ * @returns {number} Returns 1 if the assertion passes, otherwise returns 0.
  */
 export function ASSERT_NEAR(actual: number, expected: number, threshold: number, testName: string = ''): number {
     if (Math.abs(expected - actual) < threshold) {
@@ -42,13 +50,18 @@ export function ASSERT_NEAR(actual: number, expected: number, threshold: number,
 }
 
 /**
- * Asserts that the actual value is less than the expected value with a threshold of 0.005.
- * 
- * @param actual - The actual value to be compared.
- * @param expected - The expected value.
- * @param testName - The name of the test (optional).
- * @returns 1 if the assertion passes, 0 otherwise.
+ * Asserts that the actual value is less than the expected value within a threshold of 0.005.
+ *
+ * This function checks if the actual value is less than the expected value plus a 
+ * predefined threshold. If the assertion passes, a debug message is logged; otherwise, 
+ * an error message is logged.
+ *
+ * @param {number} actual - The actual value to be compared.
+ * @param {number} expected - The expected value to compare against.
+ * @param {string} [testName=''] - The name of the test (optional), used for logging purposes.
+ * @returns {number} Returns 1 if the assertion passes, otherwise returns 0.
  */
+
 export function ASSERT_LT(actual: number, expected: number, testName: string = ''): number {
     let threshold = 0.005;
 
@@ -63,12 +76,16 @@ export function ASSERT_LT(actual: number, expected: number, testName: string = '
 }
 
 /**
- * Asserts that the actual value is greater than the expected value with a given threshold.
- * 
- * @param actual - The actual value to be compared.
- * @param expected - The expected value to be compared against.
- * @param testName - The name of the test (optional).
- * @returns 1 if the assertion passes, 0 otherwise.
+ * Asserts that the actual value is greater than the expected value within a default threshold of 0.01.
+ *
+ * This function verifies that the actual value exceeds the expected value minus a 
+ * predefined threshold. Successful assertions log a debug message, while failures log 
+ * an error message.
+ *
+ * @param {number} actual - The actual value obtained from the test.
+ * @param {number} expected - The expected value to compare against.
+ * @param {string} [testName=''] - The name of the test (optional), used for logging purposes.
+ * @returns {number} Returns 1 if the assertion passes, otherwise returns 0.
  */
 export function ASSERT_GT(actual: number, expected: number, testName: string = ''): number {
     let threshold = 0.01;

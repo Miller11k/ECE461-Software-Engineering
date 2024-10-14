@@ -23,8 +23,8 @@ export class BusFactor extends Metrics {
      * 
      * Initializes the class with the native URL and the repository URL.
      * 
-     * @param nativeUrl The native URL to connect to.
-     * @param url The repository URL.
+     * @param {string} nativeUrl - The native URL to connect to.
+     * @param {string} url - The repository URL.
      */
     constructor(nativeUrl: string, url: string) {
         super(nativeUrl, url);
@@ -36,7 +36,7 @@ export class BusFactor extends Metrics {
      * Fetches commit data and calculates the bus factor based on the percentage
      * of contributions from top contributors.
      * 
-     * @return A promise that resolves to the calculated bus factor.
+     * @returns {Promise<number>} A promise that resolves to the calculated bus factor.
      */
     public async evaluate(): Promise<number> {
         const rateLimitStatus = await this.getRateLimitStatus();
@@ -64,9 +64,9 @@ export class BusFactor extends Metrics {
      * Fetches commit data from the repository, retrieving the number of commits
      * made by each contributor.
      * 
-     * @param owner The owner of the repository.
-     * @param repo The name of the repository.
-     * @return A promise that resolves to a Map where the keys are authors' usernames
+     * @param {string} owner - The owner of the repository.
+     * @param {string} repo - The name of the repository.
+     * @returns {Promise<Map<string, number>>} A promise that resolves to a Map where the keys are authors' usernames
      * and the values are the number of commits made by each author.
      */
     private async getCommitData(owner: string, repo: string): Promise<Map<string, number>> {
@@ -106,8 +106,8 @@ export class BusFactor extends Metrics {
      * Determines the number of key contributors who account for 85% of the total commits.
      * The bus factor is adjusted and limited to a value between 0 and 1.
      * 
-     * @param commitData A Map where the keys are authors' usernames and the values are the number of commits.
-     * @return The calculated bus factor.
+     * @param {Map<string, number>} commitData - A Map where the keys are authors' usernames and the values are the number of commits.
+     * @returns {number} The calculated bus factor.
      */
     private calculateBusFactor(commitData: Map<string, number>): number {
         const totalCommits = Array.from(commitData.values()).reduce((a, b) => a + b, 0);
@@ -130,7 +130,8 @@ export class BusFactor extends Metrics {
 
 /**
  * Executes a series of tests to evaluate the bus factor of different GitHub repositories.
- * @returns A promise that resolves to an object containing the number of tests passed and failed.
+ * 
+ * @returns {Promise<{ passed: number, failed: number }>} A promise that resolves to an object containing the number of tests passed and failed.
  */
 export async function BusFactorTest(): Promise<{ passed: number, failed: number }> {
     logger.info("\nRunning Bus Factor tests...");

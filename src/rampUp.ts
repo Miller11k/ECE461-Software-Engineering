@@ -21,6 +21,7 @@ export class RampUp extends Metrics {
      * 
      * Initialized to -1, which indicates an uncalculated or error state.
      */
+
     public rampUp: number = -1;
 
     /**
@@ -41,8 +42,8 @@ export class RampUp extends Metrics {
      * 
      * Initializes the class with the given native URL and project URL.
      * 
-     * @param nativeUrl The native URL to be used.
-     * @param url The URL to be used.
+     * @param {string} nativeUrl - The native URL to be used.
+     * @param {string} url - The URL to be used.
      */
     constructor(nativeUrl: string, url: string) {
         super(nativeUrl, url);
@@ -53,8 +54,8 @@ export class RampUp extends Metrics {
      * 
      * This method uses `git.clone` to perform a shallow clone of the repository to a temporary directory.
      * 
-     * @param cloneDir The directory where the repository will be cloned.
-     * @returns A promise that resolves when the cloning process is complete.
+     * @param {string} cloneDir - The directory where the repository will be cloned.
+     * @returns {Promise<void>} A promise that resolves when the cloning process is complete.
      */
     private async cloneRepository(cloneDir: string): Promise<void> {
         await git.clone({
@@ -73,7 +74,8 @@ export class RampUp extends Metrics {
      * This method traverses the directory structure of the cloned repository and checks for the presence of files
      * or directories defined in the `metrics` object.
      * 
-     * @param cloneDir The directory where the repository was cloned.
+     * @param {string} cloneDir - The directory where the repository was cloned.
+     * @returns {Promise<void>} A promise that resolves when the processing is complete.
      */
     private async processRepository(cloneDir: string): Promise<void> {
         const files = fs.readdirSync(cloneDir, { withFileTypes: true });
@@ -102,7 +104,7 @@ export class RampUp extends Metrics {
      * 
      * The ramp-up score is computed as the ratio of found metrics to total metrics.
      * 
-     * @returns The calculated ramp-up score as a number between 0 and 1.
+     * @returns {number} The calculated ramp-up score as a number between 0 and 1.
      */
     private calculateRampUpScore(): number {
         const totalFound = Object.values(this.metrics).reduce((sum, metric) => sum + (metric.found ? 1 : 0), 0);
@@ -116,7 +118,7 @@ export class RampUp extends Metrics {
      * This method clones the repository, processes it to check for metrics, calculates the ramp-up score,
      * and cleans up the cloned repository. The response time for the evaluation is also calculated and logged.
      * 
-     * @returns A promise that resolves to the ramp-up score.
+     * @returns {Promise<number>} A promise that resolves to the ramp-up score.
      */
     public async evaluate(): Promise<number> {
 
@@ -146,7 +148,8 @@ export class RampUp extends Metrics {
 
 /**
  * Executes a ramp-up test for a list of URLs and returns the number of tests passed and failed.
- * @returns A promise that resolves to an object containing the number of tests passed and failed.
+ * 
+ * @returns {Promise<{ passed: number, failed: number }>} A promise that resolves to an object containing the number of tests passed and failed.
  */
 export async function RampUpTest(): Promise<{ passed: number, failed: number }> {
     logger.info('\nRunning RampUp Tests');
