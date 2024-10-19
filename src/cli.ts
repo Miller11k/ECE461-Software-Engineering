@@ -23,19 +23,22 @@ import { exit } from 'process';
 import pkg from 'pg';
 const { Pool } = pkg;
 
+dotenv.config();
+
+// now we need to add all of the database information in the .env file
 const pool = new Pool({
-    host: 'database-1.c1kesqgwgp4q.us-east-1.rds.amazonaws.com',
-    user: 'regver1',
-    password: 'Team1_2024',
-    database: 'registry_ver1',
-    port: 5432, 
+    host: process.env.DB_HOST,
+    user: process.env.DB_USER,
+    password: process.env.DB_PASSWORD,
+    database: process.env.DB_NAME,
+    port: Number(process.env.DB_PORT), 
     ssl: {
-        rejectUnauthorized: false, // For RDS instances, for the non authorized error. 
-        ca: '../db/global-bundle.pem'
+        rejectUnauthorized: false,
+        ca: process.env.DB_SSL_CA
     }
 });
 
-dotenv.config();
+
 
 /**
  * Retrieves the GitHub repository URL from an npm package URL.
