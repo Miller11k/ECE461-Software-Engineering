@@ -24,6 +24,9 @@ yarn-error.log*
 *.swp
 *.swo
 
+#pem file
+*.pem
+
 #checker
 __pycache__
 
