@@ -7,6 +7,8 @@ import { RampUp } from './rampUp.js';
 import { Maintainability } from './maintainability.js';
 import { ASSERT_LT, ASSERT_NEAR } from './testUtils.js';
 
+
+
 /**
  * @class NetScore
  * @brief Represents a NetScore object that calculates the net score of a software project based on various metrics.
@@ -123,6 +125,7 @@ export class NetScore extends Metrics {
         // Calculate the response time
         const elapsedTime = Number(endTime - startTime) / 1e6; // Convert to milliseconds
         this.responseTime = elapsedTime
+        
 
         return this.netScore;
     }

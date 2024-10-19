@@ -19,6 +19,22 @@ import { RampUpTest } from './rampUp.js';
 import { NetScoreTest } from './netScore.js';
 import { exit } from 'process';
 
+//additions for writing to database
+import pkg from 'pg';
+const { Pool } = pkg;
+
+const pool = new Pool({
+    host: 'database-1.c1kesqgwgp4q.us-east-1.rds.amazonaws.com',
+    user: 'regver1',
+    password: 'Team1_2024',
+    database: 'registry_ver1',
+    port: 5432, 
+    ssl: {
+        rejectUnauthorized: false, // For RDS instances, for the non authorized error. 
+        ca: '../db/global-bundle.pem'
+    }
+});
+
 dotenv.config();
 
 /**
@@ -186,6 +202,65 @@ async function processUrls(filePath: string): Promise<void> {
         const result = await netScore.evaluate();
         process.stdout.write(netScore.toString() + '\n');
         logger.debug(netScore.toString());
+
+        //additions for writing to database
+
+        const insertMetricsQuery = `
+        INSERT INTO metrics (package_id, ramp_up_time, bus_factor, correctness, license_compatibility, maintainability)
+        VALUES ($1, $2, $3, $4, $5, $6)
+        RETURNING metric_id;
+        `;
+
+        const metricsValues = [
+            '3',  // NEED TO put actual package id USING EXAMPLE PAKACGE ID
+            netScore.rampUp.rampUp,
+            netScore.busFactor.busFactor,
+            netScore.correctness.correctness,
+            netScore.license.license,
+            netScore.maintainability.maintainability
+        ];
+
+        try {
+            const metricsRes = await pool.query(insertMetricsQuery, metricsValues);
+            logger.info(`Metrics inserted with metric_id: ${metricsRes.rows[0].metric_id}`);
+        } catch (err) {
+            if (err instanceof Error) {
+                logger.error(`Error inserting metrics: ${err.message}`);
+            } else {
+                logger.error('Unexpected error inserting metrics');
+            }
+        }
+
+          // Insert the latencies into the `scores` table
+          const insertScoresQuery = `
+          INSERT INTO scores (package_id, net_score, ramp_up_latency, bus_factor_latency, correctness_latency, license_latency, maintainability_latency)
+          VALUES ($1, $2, $3, $4, $5, $6, $7)
+          RETURNING score_id;
+      `;
+      
+     
+      const scoresValues = [
+          '3',  // EXAMPLE PACAGE 
+          netScore.netScore,       
+          netScore.rampUp.responseTime, 
+          netScore.busFactor.responseTime, 
+          netScore.correctness.responseTime, 
+          netScore.license.responseTime, 
+          netScore.maintainability.responseTime 
+      ];
+      
+      try {
+          const scoresRes = await pool.query(insertScoresQuery, scoresValues);
+          logger.info(`Scores inserted with score_id: ${scoresRes.rows[0].score_id}`);
+      } catch (err) {
+          if (err instanceof Error) {
+              logger.error(`Error inserting scores: ${err.message}`);
+          } else {
+              logger.error('Unexpected error inserting scores');
+          }
+      }
+
+
     }
 }
 

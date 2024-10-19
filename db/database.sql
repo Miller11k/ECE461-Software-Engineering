@@ -76,6 +76,7 @@ CREATE TABLE scores (
 -- Insert a public package
 INSERT INTO packages (package_name, file_location, is_internal)
 VALUES ('lodash', '/path/to/lodash.zip', FALSE);
+https://github.com/cloudinary/cloudinary_npm
 
 -- Insert an internal package
 INSERT INTO packages (package_name, file_location, is_internal)
