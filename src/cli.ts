@@ -6,6 +6,7 @@ import { hideBin } from 'yargs/helpers';
 import dotenv from 'dotenv';
 import axios from 'axios';
 import fs from 'fs';
+import { exit } from 'process';
 
 // Proprietaries
 import { OCTOKIT, logger, logLevel, logFile } from './Metrics.js';
@@ -17,9 +18,8 @@ import { LicenseTest } from './license.js';
 import { MaintainabilityTest } from './maintainability.js';
 import { RampUpTest } from './rampUp.js';
 import { NetScoreTest } from './netScore.js';
-import { exit } from 'process';
 
-//additions for writing to database
+// Additions for writing to the database
 import pkg from 'pg';
 const { Pool } = pkg;
 
@@ -208,6 +208,66 @@ async function processUrls(filePath: string): Promise<void> {
 
         //additions for writing to database
 
+        // INSERT PACKAGE INFO
+        const insertPackageQuery = `
+        INSERT INTO packages_combined (package_name, repo_link, is_internal, package_version, s3_link, net_score, final_metric, final_metric_latency)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+        RETURNING package_id;
+        `;
+        
+        const packageValues = [
+            netScore.packageName,            // Replace with actual package name
+            netScore.repoLink,               // Repo link
+            false,                           // Assuming external, set accordingly for internal packages
+            '1.0.0',                         // Replace with actual package version
+            null,                            // S3 link if applicable
+            netScore.netScore,               // Net score
+            netScore.finalMetric,            // Final metric
+            netScore.finalMetricLatency      // Final metric latency
+        ];
+
+        let packageId;
+        try {
+            const packageRes = await pool.query(insertPackageQuery, packageValues);
+            packageId = packageRes.rows[0].package_id;
+            logger.info(`Package inserted with package_id: ${packageId}`);
+        } catch (err) {
+            if (err instanceof Error) {
+                logger.error(`Error inserting package: ${err.message}`);
+            } else {
+                logger.error('Unexpected error inserting package');
+            }
+            return;
+        }
+
+        // INSERT DEPENDENCIES
+        const insertDependencyQuery = `
+        INSERT INTO dependencies (package_id, dependency_url, is_internal)
+        VALUES ($1, $2, $3)
+        RETURNING dependency_id;
+        `;
+
+        const dependencies = netScore.dependencies;  // Assume this array contains dependency URLs
+        for (const dep of dependencies) {
+            const dependencyValues = [
+                packageId,                       // Foreign key to link dependency to the package
+                dep.url,                         // Dependency URL
+                dep.isInternal                   // Whether the dependency is internal
+            ];
+
+            try {
+                const dependencyRes = await pool.query(insertDependencyQuery, dependencyValues);
+                logger.info(`Dependency inserted with dependency_id: ${dependencyRes.rows[0].dependency_id}`);
+            } catch (err) {
+                if (err instanceof Error) {
+                    logger.error(`Error inserting dependency: ${err.message}`);
+                } else {
+                    logger.error('Unexpected error inserting dependency');
+                }
+            }
+        }
+
+        // INSERT METRICS AND SCORES
         const insertMetricsQuery = `
         INSERT INTO metrics (package_id, ramp_up_time, bus_factor, correctness, license_compatibility, maintainability)
         VALUES ($1, $2, $3, $4, $5, $6)
