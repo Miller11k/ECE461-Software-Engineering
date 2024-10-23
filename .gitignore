@@ -24,7 +24,11 @@ yarn-error.log*
 *.swp
 *.swo
 
+#pem file
+*.pem
+
 #checker
 __pycache__
+
 
 #added space so it updates name

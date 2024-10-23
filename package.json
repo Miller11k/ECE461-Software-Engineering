@@ -14,6 +14,7 @@
   "license": "ISC",
   "devDependencies": {
     "@types/node": "^22.5.1",
+    "@types/pg": "^8.11.10",
     "@types/yargs": "^17.0.33",
     "typescript": "^5.6.2"
   },
@@ -23,6 +24,7 @@
     "dotenv": "^16.4.5",
     "fs": "^0.0.1-security",
     "isomorphic-git": "^1.27.1",
+    "pg": "^8.13.0",
     "winston": "^3.14.2",
     "yargs": "^17.7.2"
   }

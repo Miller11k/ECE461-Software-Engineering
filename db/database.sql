@@ -95,11 +95,10 @@ CREATE TABLE scores (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP  -- Timestamp of when the score and latency were recorded
 );
 
--- 8. Example inserts to populate the tables
-
--- Insert an external package (lodash)
-INSERT INTO packages (package_name, repo_link, is_internal, version, s3_link, sub_database_link, net_score, final_metric, final_metric_latency)
-VALUES ('lodash', 'https://github.com/lodash/lodash', FALSE, '4.17.21', NULL, NULL, 0.9, 0.88, 0.004);
+-- 5. Example inserts to populate the tables
+-- Insert a public package
+INSERT INTO packages (package_name, file_location, is_internal)
+VALUES ('lodash', '/path/to/lodash.zip', FALSE);
 
 -- Insert a version-specific entry for lodash
 INSERT INTO package_versions (package_id, version, s3_location, repo_link, net_score, metric_1, metric_1_latency, metric_2, metric_2_latency, metric_3, metric_3_latency, final_metric, final_metric_latency)

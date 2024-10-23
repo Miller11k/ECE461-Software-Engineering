@@ -108,6 +108,8 @@ export class Correctness extends Metrics {
                 labels: 'bug', // Filter by bug label
                 per_page: 100
             });
+         
+
 
             // Count open and total issues
             const openBugIssues = data.filter(issue => issue.state === 'open').length;

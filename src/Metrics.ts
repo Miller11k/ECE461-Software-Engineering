@@ -141,6 +141,8 @@ export abstract class Metrics {
             logger.error(`${url} is an invalid GitHub URL`);
             throw new Error(`Invalid GitHub URL: ${url}`);
         }
+
+
         return { owner: match[1], repo: match[2] };
     }
 
