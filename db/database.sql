@@ -1,16 +1,24 @@
--- 1. Create a constants table to store configurations (e.g., internal domain)
-CREATE TABLE constants (
+-- 1. Create constants table only if it doesn't exist
+CREATE TABLE IF NOT EXISTS constants (
     key VARCHAR(255) PRIMARY KEY,  -- Unique key for the configuration (e.g., 'internal_domain')
     value VARCHAR(255) NOT NULL    -- Value associated with the key
 );
 
--- Insert the internal domain into the constants table
-INSERT INTO constants (key, value) VALUES ('internal_domain', 'internal.acme.com');
+-- Insert internal domain into the constants table (if it doesn't already exist)
+DO $$
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM constants WHERE key = 'internal_domain') THEN
+        INSERT INTO constants (key, value) VALUES ('internal_domain', 'internal.acme.com');
+    END IF;
+END $$;
 
--- 2. Create a function to check if a dependency is internal based on the internal domain from the constants table
+-- 2. Drop and recreate the function only if it already exists
+DROP FUNCTION IF EXISTS is_internal_dependency;
+
+-- Create function to check if a dependency is internal based on the internal domain from the constants table
 CREATE FUNCTION is_internal_dependency(dependency_url VARCHAR)
 RETURNS BOOLEAN
-LANGUAGE SQL
+LANGUAGE PLPGSQL
 AS $$
 DECLARE
     internal_domain VARCHAR(255);
@@ -27,73 +35,74 @@ BEGIN
 END;
 $$;
 
--- 3. Create the main packages table
-CREATE TABLE packages (
-    package_id SERIAL PRIMARY KEY,               -- Unique identifier for each package
-    package_name VARCHAR(255) NOT NULL,          -- Name of the package
-    repo_link VARCHAR(512) NOT NULL,             -- Repository link for the package
-    is_internal BOOLEAN DEFAULT FALSE,           -- Boolean to indicate if the package is internal (TRUE) or external (FALSE)
-    package_version VARCHAR(50),                 -- Current version of the package (renamed from 'version')
-    s3_link VARCHAR(512),                        -- S3 bucket link for internal packages
-    sub_database_link VARCHAR(512),              -- Link to a sub-database for version-specific data (if applicable)
-    net_score DECIMAL(3, 2),                     -- Overall net score for the package (0.0 - 1.0)
-    final_metric DECIMAL(3, 2),                  -- Final overall metric score (aggregated)
-    final_metric_latency DECIMAL(5, 3),          -- Latency for calculating the final metric score
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP  -- Timestamp when the package was added
+-- 3. Create the main packages table only if it doesn't exist
+CREATE TABLE IF NOT EXISTS packages (
+    package_id SERIAL PRIMARY KEY,
+    package_name VARCHAR(255) NOT NULL,
+    repo_link VARCHAR(512) NOT NULL,
+    is_internal BOOLEAN DEFAULT FALSE,
+    package_version VARCHAR(50),
+    s3_link VARCHAR(512),
+    sub_database_link VARCHAR(512),
+    net_score DECIMAL(3, 2),
+    final_metric DECIMAL(3, 2),
+    final_metric_latency DECIMAL(5, 3),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- 4. Create a sub-table for version-specific metrics, latencies, and scores
-CREATE TABLE package_versions (
-    version_id SERIAL PRIMARY KEY,               -- Unique identifier for each version entry
-    package_id INT REFERENCES packages(package_id) ON DELETE CASCADE, -- Foreign key referencing the main packages table
-    package_version VARCHAR(50) NOT NULL,        -- Version number (renamed to 'package_version')
-    s3_location VARCHAR(512),                    -- S3 location for this version (if applicable)
-    repo_link VARCHAR(512),                      -- Repository link for this version
-    net_score DECIMAL(3, 2),                     -- Net score for this version
-    metric_1 DECIMAL(3, 2),                      -- Value for Metric 1 (e.g., ramp-up time)
-    metric_1_latency DECIMAL(5, 3),              -- Latency in seconds for Metric 1
-    metric_2 DECIMAL(3, 2),                      -- Value for Metric 2 (e.g., bus factor)
-    metric_2_latency DECIMAL(5, 3),              -- Latency in seconds for Metric 2
-    metric_3 DECIMAL(3, 2),                      -- Value for another metric (e.g., correctness)
-    metric_3_latency DECIMAL(5, 3),              -- Latency in seconds for Metric 3
-    final_metric DECIMAL(3, 2),                  -- Final metric score for this version
-    final_metric_latency DECIMAL(5, 3),          -- Latency for calculating the final metric score
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP  -- Timestamp when the version-specific data was added
+-- 4. Create a sub-table for version-specific metrics, latencies, and scores only if it doesn't exist
+CREATE TABLE IF NOT EXISTS package_versions (
+    version_id SERIAL PRIMARY KEY,
+    package_id INT REFERENCES packages(package_id) ON DELETE CASCADE,
+    package_version VARCHAR(50) NOT NULL,
+    s3_location VARCHAR(512),
+    repo_link VARCHAR(512),
+    net_score DECIMAL(3, 2),
+    metric_1 DECIMAL(3, 2),
+    metric_1_latency DECIMAL(5, 3),
+    metric_2 DECIMAL(3, 2),
+    metric_2_latency DECIMAL(5, 3),
+    metric_3 DECIMAL(3, 2),
+    metric_3_latency DECIMAL(5, 3),
+    final_metric DECIMAL(3, 2),
+    final_metric_latency DECIMAL(5, 3),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- 5. Create a table for package dependencies
-CREATE TABLE dependencies (
-    dependency_id SERIAL PRIMARY KEY,       -- Unique identifier for each dependency
-    package_id INT REFERENCES packages(package_id) ON DELETE CASCADE, -- Foreign key to the associated package
-    dependency_url VARCHAR(512) NOT NULL,   -- The URL or location of the dependency (e.g., npm or internal registry)
-    is_internal BOOLEAN DEFAULT FALSE,      -- Boolean to indicate if the dependency is internal
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP  -- Timestamp of when the dependency was added
+-- 5. Create the dependencies table only if it doesn't exist
+CREATE TABLE IF NOT EXISTS dependencies (
+    dependency_id SERIAL PRIMARY KEY,
+    package_id INT REFERENCES packages(package_id) ON DELETE CASCADE,
+    dependency_url VARCHAR(512) NOT NULL,
+    is_internal BOOLEAN DEFAULT FALSE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- 6. Create a table for metrics (aggregated)
-CREATE TABLE metrics (
-    metric_id SERIAL PRIMARY KEY,           -- Unique identifier for each metric entry
-    package_id INT REFERENCES packages(package_id) ON DELETE CASCADE, -- Foreign key to the associated package
-    ramp_up_time DECIMAL(3, 2),             -- Metric for ramp-up time (score between 0 and 1)
-    bus_factor DECIMAL(3, 2),               -- Metric for bus factor (score between 0 and 1)
-    correctness DECIMAL(3, 2),              -- Metric for correctness (score between 0 and 1)
-    license_compatibility DECIMAL(3, 2),    -- Metric for license compatibility (score between 0 and 1)
-    maintainability DECIMAL(3, 2),          -- Metric for maintainability (score between 0 and 1)
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP  -- Timestamp of when the metrics were recorded
+-- 6. Create a table for metrics only if it doesn't exist
+CREATE TABLE IF NOT EXISTS metrics (
+    metric_id SERIAL PRIMARY KEY,
+    package_id INT REFERENCES packages(package_id) ON DELETE CASCADE,
+    ramp_up_time DECIMAL(3, 2),
+    bus_factor DECIMAL(3, 2),
+    correctness DECIMAL(3, 2),
+    license_compatibility DECIMAL(3, 2),
+    maintainability DECIMAL(3, 2),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- 7. Create a table to store scores and latencies for metrics
-CREATE TABLE scores (
-    score_id SERIAL PRIMARY KEY,            -- Unique identifier for each score entry
-    package_id INT REFERENCES packages(package_id) ON DELETE CASCADE, -- Foreign key to the associated package
-    net_score DECIMAL(3, 2),                -- Net score for the package (between 0 and 1)
-    ramp_up_latency DECIMAL(5, 3),          -- Latency in seconds for calculating the ramp-up time metric
-    bus_factor_latency DECIMAL(5, 3),       -- Latency in seconds for calculating the bus factor metric
-    correctness_latency DECIMAL(5, 3),      -- Latency for calculating correctness
-    license_latency DECIMAL(5, 3),          -- Latency in seconds for checking license compatibility
-    maintainability_latency DECIMAL(5, 3),  -- Latency for maintainability checks
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP  -- Timestamp of when the score and latency were recorded
+-- 7. Create a table to store scores only if it doesn't exist
+CREATE TABLE IF NOT EXISTS scores (
+    score_id SERIAL PRIMARY KEY,
+    package_id INT REFERENCES packages(package_id) ON DELETE CASCADE,
+    net_score DECIMAL(3, 2),
+    ramp_up_latency DECIMAL(5, 3),
+    bus_factor_latency DECIMAL(5, 3),
+    correctness_latency DECIMAL(5, 3),
+    license_latency DECIMAL(5, 3),
+    maintainability_latency DECIMAL(5, 3),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+
 
 -- 8. Example inserts to populate the tables
 
